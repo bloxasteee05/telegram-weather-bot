@@ -4,6 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 // подключение токена
 string botToken = "8685325423:AAHlOF-j_0Az0OfsRNHXqjipQiaRoGfttRQ";
@@ -47,13 +48,35 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
     // проверяем какую командку написал пользователь
     if (messageText == "/start")
     {
+        // создаем кнопки
+        var keyboard = new Telegram.Bot.Types.ReplyMarkups.ReplyKeyboardMarkup(
+            new[]
+            {
+                // первая строка кнопок
+                new[]
+                {
+                    new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Москва"),
+                    new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Сибай")
+                },
+                // втроая строка кнопкок
+                new [] { new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Минск"),
+                new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Уфа") }
+            })
+        
+        {
+            // кнопки подстраиваются под размер экрана
+           ResizeKeyboard = true
+        };
+            
+        
         // ответ на команду /start
         await bot.SendMessage(chatId,
             "👋 Привет! Я бот погоды!\n\n" +
             "🌍 Напиши мне любой город, а я дам ответ!\n\n" +
             "Например: Москва, Вашингтон и т.д!\n\n" +
-            "❓ Понадобилась помощь? Пиши - /help\n\n");
-        CancellationToken:
+            "❓ Понадобилась помощь? Пиши - /help",
+        replyMarkup: keyboard,
+        cancellationToken: ct);
         return;
     }
 
@@ -94,10 +117,12 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
         // Достаём нужные данные из ответа
         var json = Newtonsoft.Json.Linq.JObject.Parse(response);
         var cityName = json["name"]?.ToString();
-        var temp = json["main"]?["temp"]?.ToString();
+        var temp = Math.Round(double.Parse(json["main"]?["temp"]?.ToString()), 0).ToString();
+        var feelsLike = Math.Round(double.Parse(json["main"]?["feels_like"]?.ToString()), 0).ToString();
         var description = json["weather"]?[0]?["description"]?.ToString();
         var humidity = json["main"]?["humidity"]?.ToString();
-        var feelsLike = json["main"]?["feels_like"]?.ToString();
+       
+    
 
         var answer = $"🌤 Погода в {cityName}:\n" +
                      $"🌡 Температура: {temp}°C\n" +
