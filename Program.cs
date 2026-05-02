@@ -61,6 +61,8 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
                 // втроая строка кнопкок
                 new [] { new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Минск"),
                 new Telegram.Bot.Types.ReplyMarkups.KeyboardButton("Уфа") }
+                
+                
             })
         
         {
@@ -107,6 +109,39 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
         await bot.SendMessage(chatId,
             "📅 Напиши название города для прогноза на 5 дней!\n\n" +
             "Например: Москва или London",
+            cancellationToken: ct);
+        return;
+    }
+    // проверяем какую командку написал пользователь
+    if (messageText == "/info")
+        {
+            // ответ на команду /info
+            await bot.SendMessage(chatId,
+                "⛅ Информация о боте\n\n" +
+                "Привет! Я — твой погодный помощник 🌍\nПомогу быстро узнать актуальную погоду в любом городе ☁️\n\n" +
+                "📌 Что я умею:\n• " +
+                "Показывать текущую температуру 🌡️\n• " +
+                "Отправлять прогноз на день и неделю 🛠️⚠️ (в разработке)\n• " +
+                "Показывать влажность, ветер и осадки 🌧️⚠️ (в разработке)\n• " +
+                "Быстро находить погоду по названию города 🔎\n\n⚡ " +
+                "Команды бота:\n`" +
+                "/forecast — прогноз 🛠️ (в разработке)\n`" +
+                "/help — помощь по командам ❓\n`" +
+                "/author — информация о разработчике 👨‍💻\n`" +
+                "/info — информация о боте ℹ️\n\n" +
+                "🌈 Спасибо, что пользуешься ботом!\n" +
+                "Желаю тебе только хорошей погоды ☀️\n\n\n");
+            CancellationToken:
+            return;
+        }
+    // проверяем какую командку написал пользователь
+    if (messageText == "/ping")
+    {
+        // ответ на команду /ping
+        await bot.SendMessage(chatId,
+            "🟢 Бот работает!\n\n" +
+            "⚡️ Задержка: в норме\n" +
+            "🤖 Статус: онлайн",
             cancellationToken: ct);
         return;
     }
