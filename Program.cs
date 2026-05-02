@@ -99,6 +99,17 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
         CancellationToken:
         return;
     }
+    
+    // проверяем какую командку написал пользователь
+    if (messageText == "/forecast")
+    {
+        // ответ на команду /forecast
+        await bot.SendMessage(chatId,
+            "📅 Напиши название города для прогноза на 5 дней!\n\n" +
+            "Например: Москва или London",
+            cancellationToken: ct);
+        return;
+    }
 
 
     // если пользователь написал не команду ищем погоду
@@ -121,14 +132,30 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
         var feelsLike = Math.Round(double.Parse(json["main"]?["feels_like"]?.ToString()), 0).ToString();
         var description = json["weather"]?[0]?["description"]?.ToString();
         var humidity = json["main"]?["humidity"]?.ToString();
-       
-    
+        // получаем числовое значение температуры для совета
+        var tempValue =  double.Parse(temp);
+        
 
+        // даем умный совет в зависимости от погоды
+        string advice;
+        if (tempValue >= 25)
+            advice = "😎 На улице жарко — возьми воду и солнцезащитный крем!";
+        else if (tempValue >= 15)
+            advice = "👕 Отличная погода — можно идти гулять!";
+        else if (tempValue >= 5)
+            advice = "🧥 Прохладно — возьми куртку!";
+        else if (tempValue >= -10)
+            advice = "🥶 Холодно — одевайся теплее!";
+        else
+            advice = "🧊 Очень сильный мороз — лучше остаться дома!";
+        
+        // красивый ответ пользователю
         var answer = $"🌤 Погода в {cityName}:\n" +
                      $"🌡 Температура: {temp}°C\n" +
                      $"🤔 Ощущается как: {feelsLike}°C\n" +
                      $"💧 Влажность: {humidity}%\n" +
-                     $"☁️ {description}";
+                     $"☁️ {description}\n\n" +
+                     $"💡 Совет: {advice}";
 
         await bot.SendMessage(chatId, answer, cancellationToken: ct);
     }
