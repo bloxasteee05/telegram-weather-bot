@@ -216,8 +216,54 @@ if (messageText == "/myweather")
     await bot.SendMessage(chatId, answer, cancellationToken: ct);
     return;
 }
+
+// если пользователь написал "прогноз Город" — показываем прогноз на 5 дней
+if (messageText.StartsWith("прогноз "))
+{
+    var forecastCity = messageText.Replace("прогноз ", "");
     
-    
+    await bot.SendMessage(chatId,
+        $"🔍 Ищу прогноз для: {forecastCity}...",
+        cancellationToken: ct);
+
+    try
+    {
+        var url = $"https://api.openweathermap.org/data/2.5/forecast?q={forecastCity}&appid={weatherApiKey}&units=metric&lang=ru&cnt=40";
+        var response = await httpClient.GetStringAsync(url);
+        var json = Newtonsoft.Json.Linq.JObject.Parse(response);
+        var list = json["list"];
+
+        var result = $"📅 Прогноз для {forecastCity}:\n\n";
+        
+        // список уже показанных дней — СНАРУЖИ foreach
+        var shownDays = new List<string>();
+
+        foreach (var forecastItem in list)
+        {
+            var fullDate = forecastItem["dt_txt"]?.ToString();
+            var day = fullDate?.Split(' ')[0];
+
+            if (shownDays.Contains(day)) continue;
+            shownDays.Add(day);
+
+            var forecastTemp = Math.Round(double.Parse(forecastItem["main"]?["temp"]?.ToString()), 0);
+            var forecastDesc = forecastItem["weather"]?[0]?["description"]?.ToString();
+
+            result += $"📅 {day}\n" +
+                      $"🌡 {forecastTemp}°C — {forecastDesc}\n\n";
+        }
+
+        // отправляем ОДИН раз  СНАРУЖИ foreach
+        await bot.SendMessage(chatId, result, cancellationToken: ct);
+    }
+    catch
+    {
+        await bot.SendMessage(chatId,
+            $"❌ Город \"{forecastCity}\" не найден!",
+            cancellationToken: ct);
+    }
+    return;
+}
 
 
     // если пользователь написал не команду ищем погоду
