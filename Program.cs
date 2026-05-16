@@ -289,6 +289,9 @@ if (messageText.StartsWith("прогноз "))
         var description = json["weather"]?[0]?["description"]?.ToString();
         var humidity = json["main"]?["humidity"]?.ToString();
         
+        // достаем скорость ветра
+        var wind = Math.Round(double.Parse(json["wind"]?["speed"]?.ToString()), 0).ToString();
+        
         // достаём время восхода солнца
         var sunriseUnix = long.Parse(json["sys"]?["sunrise"]?.ToString());
         var sunrise = DateTimeOffset.FromUnixTimeSeconds(sunriseUnix).ToLocalTime().ToString("HH:mm");
@@ -320,6 +323,7 @@ if (messageText.StartsWith("прогноз "))
                      $"🤔 Ощущается как: {feelsLike}°C\n" +
                      $"💧 Влажность: {humidity}%\n" +
                      $"☁️ {description}\n\n" +
+                     $"💨 Ветер: {wind} м/с\n" +
                      $"🌅 Восход: {sunrise}\n" +
                      $"🌇 Закат: {sunset}\n\n" +
                      $"💡 Совет: {advice}";
