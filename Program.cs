@@ -206,6 +206,8 @@ if (messageText == "/myweather")
     var feelsLike = Math.Round(double.Parse(json["main"]?["feels_like"]?.ToString()), 0).ToString();
     var description = json["weather"]?[0]?["description"]?.ToString();
     var humidity = json["main"]?["humidity"]?.ToString();
+
+   
     
     var answer = $"📍 Погода в твоём городе {cityName}:\n" +
                  $"🌡 Температура: {temp}°C\n" +
@@ -286,6 +288,15 @@ if (messageText.StartsWith("прогноз "))
         var feelsLike = Math.Round(double.Parse(json["main"]?["feels_like"]?.ToString()), 0).ToString();
         var description = json["weather"]?[0]?["description"]?.ToString();
         var humidity = json["main"]?["humidity"]?.ToString();
+        
+        // достаём время восхода солнца
+        var sunriseUnix = long.Parse(json["sys"]?["sunrise"]?.ToString());
+        var sunrise = DateTimeOffset.FromUnixTimeSeconds(sunriseUnix).ToLocalTime().ToString("HH:mm");
+    
+        // достаём время заката солнца
+        var sunsetUnix = long.Parse(json["sys"]?["sunset"]?.ToString());
+        var sunset = DateTimeOffset.FromUnixTimeSeconds(sunsetUnix).ToLocalTime().ToString("HH:mm");
+        
         // получаем числовое значение температуры для совета
         var tempValue =  double.Parse(temp);
         
@@ -309,6 +320,8 @@ if (messageText.StartsWith("прогноз "))
                      $"🤔 Ощущается как: {feelsLike}°C\n" +
                      $"💧 Влажность: {humidity}%\n" +
                      $"☁️ {description}\n\n" +
+                     $"🌅 Восход: {sunrise}\n" +
+                     $"🌇 Закат: {sunset}\n\n" +
                      $"💡 Совет: {advice}";
 
         await bot.SendMessage(chatId, answer, cancellationToken: ct);
