@@ -292,6 +292,29 @@ if (messageText.StartsWith("прогноз "))
         // достаем скорость ветра
         var wind = Math.Round(double.Parse(json["wind"]?["speed"]?.ToString()), 0).ToString();
         
+        // достаём направление ветра в градусах
+        var windDegrees = double.Parse(json["wind"]?["deg"]?.ToString());
+        
+        // переводим градусы в понятное направление
+        string windDirection;
+        if (windDegrees >= 337.5 || windDegrees < 22.5)
+            windDirection = "⬆️ Север";
+        else if (windDegrees >= 22.5 && windDegrees < 67.5)
+            windDirection = "↗️ Северо-восток";
+        else if (windDegrees >= 67.5 && windDegrees < 112.5)
+            windDirection = "➡️ Восток";
+        else if (windDegrees >= 112.5 && windDegrees < 157.5)
+            windDirection = "↘️ Юго-восток";
+        else if (windDegrees >= 157.5 && windDegrees < 202.5)
+            windDirection = "⬇️ Юг";
+        else if (windDegrees >= 202.5 && windDegrees < 247.5)
+            windDirection = "↙️ Юго-запад";
+        else if (windDegrees >= 247.5 && windDegrees < 292.5)
+            windDirection = "⬅️ Запад";
+        else
+            windDirection = "↖️ Северо-запад";
+        
+        
         // достаём время восхода солнца
         var sunriseUnix = long.Parse(json["sys"]?["sunrise"]?.ToString());
         var sunrise = DateTimeOffset.FromUnixTimeSeconds(sunriseUnix).ToLocalTime().ToString("HH:mm");
@@ -323,7 +346,7 @@ if (messageText.StartsWith("прогноз "))
                      $"🤔 Ощущается как: {feelsLike}°C\n" +
                      $"💧 Влажность: {humidity}%\n" +
                      $"☁️ {description}\n\n" +
-                     $"💨 Ветер: {wind} м/с\n" +
+                     $"💨 Ветер: {wind} м/с {windDirection}\n" +
                      $"🌅 Восход: {sunrise}\n" +
                      $"🌇 Закат: {sunset}\n\n" +
                      $"💡 Совет: {advice}";
