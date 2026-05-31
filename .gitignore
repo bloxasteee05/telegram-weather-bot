@@ -2,3 +2,6 @@
 obj/
 .idea/
 *.user
+appsettings.json
+.env
+*.secret
