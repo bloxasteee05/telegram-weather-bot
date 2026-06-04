@@ -107,15 +107,65 @@ async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, Cancellation
     }
     
     // проверяем какую командку написал пользователь
-    if (messageText == "/forecast")
+    if (messageText == "/forecast" || messageText.StartsWith("/forecast "))
     {
-        // ответ на команду /forecast
+        // если написал просто /forecast без города
+        if (messageText == "/forecast")
+        {
+            await bot.SendMessage(chatId,
+                "📅 Напиши город прямо в команде!\n\n" +
+                "Например: /forecast Москва\nИли: /forecast London",
+                cancellationToken: ct);
+            return;
+        }
+
+        // достаём город из команды: "/forecast Москва" → "Москва"
+        var forecastCity = messageText.Replace("/forecast ", "");
+
         await bot.SendMessage(chatId,
-            "📅 Напиши название города для прогноза на 5 дней!\n\n" +
-            "Например: Москва или London",
+            $"🔍 Ищу прогноз для: {forecastCity}...",
             cancellationToken: ct);
+
+        try
+        {
+            var url = $"https://api.openweathermap.org/data/2.5/forecast?q={forecastCity}&appid={weatherApiKey}&units=metric&lang=ru&cnt=40";
+            var response = await httpClient.GetStringAsync(url);
+            var json = Newtonsoft.Json.Linq.JObject.Parse(response);
+            var list = json["list"];
+
+            var result = $"📅 Прогноз для {forecastCity}:\n\n";
+            var shownDays = new List<string>();
+
+            foreach (var forecastItem in list)
+            {
+                var fullDate = forecastItem["dt_txt"]?.ToString();
+                var day = fullDate?.Split(' ')[0];
+
+                if (shownDays.Contains(day)) continue;
+                shownDays.Add(day);
+
+                var forecastTemp = Math.Round(double.Parse(forecastItem["main"]?["temp"]?.ToString()), 0);
+                var forecastDesc = forecastItem["weather"]?[0]?["description"]?.ToString();
+
+                result += $"📅 {day}\n" +
+                          $"🌡 {forecastTemp}°C — {forecastDesc}\n\n";
+            }
+
+            await bot.SendMessage(chatId, result, cancellationToken: ct);
+        }
+        catch
+        {
+            await bot.SendMessage(chatId,
+                $"❌ Город \"{forecastCity}\" не найден!\n\n" +
+                $"Попробуй написать по другому\n" +
+                $"Например: /forecast Москва",
+                cancellationToken: ct);
+        }
         return;
     }
+    
+     
+    
     // проверяем какую командку написал пользователь
     if (messageText == "/info")
         {
