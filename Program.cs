@@ -339,6 +339,12 @@ if (messageText.StartsWith("прогноз "))
         var description = json["weather"]?[0]?["description"]?.ToString();
         var humidity = json["main"]?["humidity"]?.ToString();
         
+        // достаём смещение часового пояса города в секундах
+        var timezoneOffset = int.Parse(json["timezone"]?.ToString());
+
+        // вычисляем текущее время в городе
+        var cityTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromSeconds(timezoneOffset)).ToString("HH:mm");
+        
         // достаем скорость ветра
         var wind = Math.Round(double.Parse(json["wind"]?["speed"]?.ToString()), 0).ToString();
         
@@ -392,6 +398,7 @@ if (messageText.StartsWith("прогноз "))
         
         // красивый ответ пользователю
         var answer = $"🌤 Погода в {cityName}:\n" +
+                     $"🕐 Местное время: {cityTime}\n" +
                      $"🌡 Температура: {temp}°C\n" +
                      $"🤔 Ощущается как: {feelsLike}°C\n" +
                      $"💧 Влажность: {humidity}%\n" +
